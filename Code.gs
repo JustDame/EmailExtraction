@@ -1,4 +1,4 @@
-// To get messages from emailS
+// To get messages from emails
 function getRelevantMessages()
 {
   var threads = GmailApp.search("subject: Nophin",0,10);
