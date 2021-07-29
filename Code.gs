@@ -1,4 +1,4 @@
-// To get messages from emails
+// To get messages from emails 
 function getRelevantMessages()
 {
   var threads = GmailApp.search("subject: Nophin",0,10);
@@ -54,30 +54,38 @@ function parseMessageData(messages)
       rec.Destination = myDestination[i].substring(12);
       rec.OrderId = messageId + i;
       rec.CustomerEmail = fromAddress;
-      //cleanup data
+      //cleanup data 
       records.push(rec);
     }
   }
-  saveDataToSheet(records);
+  
   Logger.log("These are the records ")
   Logger.log(records);
   return records;
 }
+
 // sets up display for the parsed data
 function getParsedDataDisplay()
 {
   var templ = HtmlService.createTemplateFromFile('parsed');
   templ.records = parseMessageData(getRelevantMessages());
+  saveDataToSheet(templ.records);
   return templ.evaluate();
 }
+
 // calls getParsedDataDisplay and starts web app
 function doGet()
 {
   return getParsedDataDisplay();
 }
+
 // takes the recorded data and saves to sheet
 function saveDataToSheet(records)
 {
+  //START - command to clear the data in the Spreadsheet
+  ClearCells();
+  //END - command to clear the data in the Spreadsheet 
+ 
   var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   var sheet = spreadsheet.getSheetByName("Sheet1");
   for(var r=0;r<records.length;r++)
@@ -86,6 +94,14 @@ function saveDataToSheet(records)
   }
   
 }
+
+// Clears SpreadSheet cells
+function ClearCells() {
+  var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
+  sheet.getRange('A2:E9').clearContent();
+}
+  
+
 // Processes the emails and looks for transactions
 function processTransactionEmails()
 {
@@ -93,12 +109,14 @@ function processTransactionEmails()
   var records = parseMessageData(messages);
   saveDataToSheet(records);
 }
+
 // write multiple rows to the spreadsheet
 function writeMultipleRows() {
  var data = getOrdersData();
  var lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
  SpreadsheetApp.getActiveSheet().getRange(lastRow + 1,1,data.length, data[0].length).setValues(data);
 }
+
 // if random rows are needed
 function getMultipleRandomRows() {
  let OrderId = 1800;
