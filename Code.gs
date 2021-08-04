@@ -1,4 +1,4 @@
-// To get messages from emails 
+// To get messages from emails
 function getRelevantMessages()
 {
   var threads = GmailApp.search("subject: Nophin",0,10);
@@ -98,7 +98,14 @@ function saveDataToSheet(records)
 // Clears SpreadSheet cells
 function ClearCells() {
   var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
-  sheet.getRange('A2:E9').clearContent();
+  var lastRow = sheet.getLastRow();
+  Logger.log("what is inside lastRow "+ lastRow);
+  var lastColumn = sheet.getLastColumn();
+  Logger.log("What is inside lastColumn "+ lastColumn);
+  var rangeForClear = "A2:E" + lastRow;
+  Logger.log("Today is Friday" + rangeForClear);
+  
+  sheet.getRange(rangeForClear).clearContent();
 }
   
 
