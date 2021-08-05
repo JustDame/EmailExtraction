@@ -83,8 +83,9 @@ function doGet()
 // takes the recorded data and saves to sheet
 function saveDataToSheet(records)
 {
+   
   //START - command to clear the data in the Spreadsheet
-  ClearCells();
+  //ClearCells();
   //END - command to clear the data in the Spreadsheet 
  
   var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
@@ -94,9 +95,15 @@ function saveDataToSheet(records)
     sheet.appendRow([records[r].OrderId,records[r].Quantity,records[r].Product, records[r].Destination,records[r].CustomerEmail ]);
   }
   
+  
 }
 
-// Clears SpreadSheet cells
+/* 1) Places the spreadsheet in a variable 
+ * 2)Finds the last row on the sheet
+ * 3)Finds the last column on the sheet 
+ * 4)Builds a string with a range to be cleared
+ * 5)Clears content of the sheet within the range
+ */     
 function ClearCells() {
   var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   var lastRow = sheet.getLastRow();
@@ -108,6 +115,42 @@ function ClearCells() {
   
   sheet.getRange(rangeForClear).clearContent();
 }
+
+/* Remove duplicates rows from spreadsheet
+ * 1)Gets the active sheet and places it into a variable
+ * 2)Gets all data from all the rows 
+ * 3)Creates an empty array
+ * 4)Looping through the rows 
+ * 5)For each row: Adds to new array if it is not already there.
+ * 6)Clears everything from A2:E to the last row.
+ * 7)Puts new data without duplicates starting at A2.
+*/ 
+
+function nowRemoveDuplicates() {
+  var sheet   = SpreadsheetApp.getActiveSheet();
+  var data    = sheet.getDataRange().getValues();
+  var newData = [];
+  
+  for (var i in data){
+    var row  = data[i];
+    var duplicate = false;
+    for (var j in newData){
+      if (row.join() == newData[j].join()){
+        
+        duplicate = true;
+      }
+    }
+    if (!duplicate){
+      newData.push(row);
+    
+    }
+  }
+  
+  ClearCells();
+  sheet.getRange(2,1 , newData.length, newData[0].length).setValues(newData);
+  
+}
+
   
 
 // Processes the emails and looks for transactions
