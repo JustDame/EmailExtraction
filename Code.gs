@@ -1,4 +1,5 @@
-// To get messages from emails 
+//Test to see if everything updates....
+// To get messages from emails
 function getRelevantMessages()
 {
   var threads = GmailApp.search("subject: Nophin",0,10);
@@ -64,28 +65,42 @@ function parseMessageData(messages)
   return records;
 }
 
-// sets up display for the parsed data
+/* 1)Sets up display for the parsed data
+ * 2)Creates a template from the parsed file 
+ * 3)Data is saved to templ.records
+ * 4)An evaluated templ is returned 
+*/
 function getParsedDataDisplay()
 {
+  
   var templ = HtmlService.createTemplateFromFile('parsed');
   templ.records = parseMessageData(getRelevantMessages());
   saveDataToSheet(templ.records);
+  NowRemoveDuplicates();
   return templ.evaluate();
 }
 
 // calls getParsedDataDisplay and starts web app
 function doGet()
-{
+{ 
+  
   return getParsedDataDisplay();
+  
 }
 
-// takes the recorded data and saves to sheet
+/* 
+ * 1)Opens the spreadsheet with an Url
+ * 3)Looks for the current sheet by name
+ * 4)For each:Adding each record to row
+ *  
+*/
 function saveDataToSheet(records)
 {
+   
   //START - command to clear the data in the Spreadsheet
   ClearCells();
   //END - command to clear the data in the Spreadsheet 
- 
+  
   var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   var sheet = spreadsheet.getSheetByName("Sheet1");
   for(var r=0;r<records.length;r++)
@@ -93,27 +108,80 @@ function saveDataToSheet(records)
     sheet.appendRow([records[r].OrderId,records[r].Quantity,records[r].Product, records[r].Destination,records[r].CustomerEmail ]);
   }
   
+  
 }
 
-// Clears SpreadSheet cells
+/* 1) Places the spreadsheet in a variable 
+ * 2)Finds the last row on the sheet
+ * 3)Finds the last column on the sheet 
+ * 4)Builds a string with a range to be cleared
+ * 5)Clears content of the sheet within the range
+ */     
 function ClearCells() {
   var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
-  sheet.getRange('A2:E9').clearContent();
+  var lastRow = sheet.getLastRow();
+  Logger.log("what is inside lastRow "+ lastRow);
+  var lastColumn = sheet.getLastColumn();
+  Logger.log("What is inside lastColumn "+ lastColumn);
+  var rangeForClear = "A2:E" + lastRow;
+  Logger.log("Today is Friday" + rangeForClear);
+  
+  sheet.getRange(rangeForClear).clearContent();
 }
+
+/* Remove duplicates rows from spreadsheet
+ * 1)Gets the active sheet and places it into a variable
+ * 2)Gets all data from all the rows 
+ * 3)Creates an empty array
+ * 4)Looping through the rows 
+ * 5)For each row: Adds to new array if it is not already there.
+ * 6)Clears everything from A2:E to the last row.
+ * 7)Puts new data without duplicates starting at A2.
+*/ 
+
+function NowRemoveDuplicates(){
+  let sheet   = SpreadsheetApp.getActiveSheet();
+  let data    = sheet.getDataRange().getValues();
+  let newData = [];
+  
+  for (let i in data){
+    Logger.log("This is the value for i " + i);
+    let row  = data[i];
+    Logger.log("This is the value for row " + row);
+    let duplicate;
+    Logger.log("This is the value for duplicate " + duplicate);
+    for (let j in newData){
+      Logger.log("This the variable for j " + j);  
+      Logger.log("Value of row[i] " + row[i]);
+      if(row[0] == newData[j][0] && row[1] == newData[j][1]){
+        duplicate = true;
+      }
+    }
+    if (!duplicate){
+      newData.push(row);
+    
+    }
+    
+  }
+  //ClearCells();
+  //sheet.getRange(2,1,newData.length, newData[0].length).setValues(newData);
+  
+}
+
   
 
 // Processes the emails and looks for transactions
 function processTransactionEmails()
 {
-  var messages = getRelevantMessages();
-  var records = parseMessageData(messages);
-  saveDataToSheet(records);
+  let messages = getRelevantMessages();
+  let records = parseMessageData(messages);
+  //saveDataToSheet(records);
 }
 
 // write multiple rows to the spreadsheet
 function writeMultipleRows() {
- var data = getOrdersData();
- var lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
+ let data = getOrdersData();
+ let lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
  SpreadsheetApp.getActiveSheet().getRange(lastRow + 1,1,data.length, data[0].length).setValues(data);
 }
 
