@@ -88,17 +88,17 @@ function doGet()
   
 }
 
-/* 1)Takes the recorded data and saves to sheet
- * 2)Opens the spreadsheet with an Url
+/* 
+ * 1)Opens the spreadsheet with an Url
  * 3)Looks for the current sheet by name
- * 4)For each:Row it appends the sheet headers
+ * 4)For each:Adding each record to row
  *  
 */
 function saveDataToSheet(records)
 {
    
   //START - command to clear the data in the Spreadsheet
-  //ClearCells();
+  ClearCells();
   //END - command to clear the data in the Spreadsheet 
   
   var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
@@ -140,30 +140,31 @@ function ClearCells() {
 */ 
 
 function NowRemoveDuplicates(){
-  var sheet   = SpreadsheetApp.getActiveSheet();
-  var data    = sheet.getDataRange().getValues();
-  var newData = [];
+  let sheet   = SpreadsheetApp.getActiveSheet();
+  let data    = sheet.getDataRange().getValues();
+  let newData = [];
   
-  for (var i in data){
+  for (let i in data){
     Logger.log("This is the value for i " + i);
-    var row  = data[i];
+    let row  = data[i];
     Logger.log("This is the value for row " + row);
-    var duplicate;
+    let duplicate;
     Logger.log("This is the value for duplicate " + duplicate);
-    for (var j in newData){
-    Logger.log("This the variable for j " + j);  
-      
-    if(row[0] == newData[j][0] && row[1] == newData[j][1]){
-      duplicate = true;
-    }
+    for (let j in newData){
+      Logger.log("This the variable for j " + j);  
+      Logger.log("Value of row[i] " + row[i]);
+      if(row[0] == newData[j][0] && row[1] == newData[j][1]){
+        duplicate = true;
+      }
     }
     if (!duplicate){
       newData.push(row);
     
     }
+    
   }
-  ClearCells();
-  sheet.getRange(2,1 , newData.length, newData[0].length).setValues(newData);
+  //ClearCells();
+  //sheet.getRange(2,1,newData.length, newData[0].length).setValues(newData);
   
 }
 
@@ -172,15 +173,15 @@ function NowRemoveDuplicates(){
 // Processes the emails and looks for transactions
 function processTransactionEmails()
 {
-  var messages = getRelevantMessages();
-  var records = parseMessageData(messages);
-  saveDataToSheet(records);
+  let messages = getRelevantMessages();
+  let records = parseMessageData(messages);
+  //saveDataToSheet(records);
 }
 
 // write multiple rows to the spreadsheet
 function writeMultipleRows() {
- var data = getOrdersData();
- var lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
+ let data = getOrdersData();
+ let lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
  SpreadsheetApp.getActiveSheet().getRange(lastRow + 1,1,data.length, data[0].length).setValues(data);
 }
 
