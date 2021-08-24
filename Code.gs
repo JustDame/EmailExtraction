@@ -1,8 +1,7 @@
-//Test to see if everything updates....
 // To get messages from emails
 function getRelevantMessages()
 {
-  var threads = GmailApp.search("subject: Nophin",0,100);
+  var threads = GmailApp.search("subject: Nophin",0,1000);
   var messages=[];
   threads.forEach(function(thread)
                   { 
