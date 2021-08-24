@@ -2,7 +2,7 @@
 // To get messages from emails
 function getRelevantMessages()
 {
-  var threads = GmailApp.search("subject: Nophin",0,10);
+  var threads = GmailApp.search("subject: Nophin",0,100);
   var messages=[];
   threads.forEach(function(thread)
                   { 
@@ -14,8 +14,7 @@ function getRelevantMessages()
                     }
                   });
                   
-  Logger.log("Tuesday")                
-  Logger.log(messages);
+  
   return messages;
 }
 
@@ -36,7 +35,7 @@ function parseMessageData(messages)
     var myProduct = text.match(/Product:[A-z0-9 ]+/g);
     var myDestination = text.match(/Destination:[A-z0-9 ]+/g);
     
-    Logger.log("Info from emails " + myQuantity + myProduct + myDestination);
+    Logger.log("Info from emails " + myQuantity +" "+ myProduct +" "+ myDestination);
   
 
     if(!myQuantity ||!myProduct || !myDestination)
@@ -49,7 +48,7 @@ function parseMessageData(messages)
     
     for(let i=0;i<myQuantity.length;i++){
       console.log("Checking for Quantity " + myQuantity.length) 
-      var rec = {}    
+      let rec = {}    
       rec.Quantity = myQuantity[i].substring(9);
       rec.Product = myProduct[i].substring(8);
       rec.Destination = myDestination[i].substring(12);
@@ -60,14 +59,15 @@ function parseMessageData(messages)
     }
   }
   
-  Logger.log("These are the records ")
+  Logger.log("How many records found "+ records.length);
   Logger.log(records);
   return records;
+
 }
 
 /* 1)Sets up display for the parsed data
- * 2)Creates a template from the parsed file 
- * 3)Data is saved to templ.records
+ * 2)Creates a template from the parsed html file 
+ * 3)Data from relevant message is saved to templ.records
  * 4)An evaluated templ is returned 
 */
 function getParsedDataDisplay()
@@ -76,7 +76,10 @@ function getParsedDataDisplay()
   var templ = HtmlService.createTemplateFromFile('parsed');
   templ.records = parseMessageData(getRelevantMessages());
   saveDataToSheet(templ.records);
-  NowRemoveDuplicates();
+  removeDuplicates();
+  
+  //NowRemoveDuplicates();
+  //templ.records();
   return templ.evaluate();
 }
 
@@ -98,13 +101,12 @@ function saveDataToSheet(records)
 {
    
   //START - command to clear the data in the Spreadsheet
-  ClearCells();
+  clearCells();
   //END - command to clear the data in the Spreadsheet 
   
-  var spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
-  var sheet = spreadsheet.getSheetByName("Sheet1");
-  for(var r=0;r<records.length;r++)
-  {
+  let spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
+  let sheet = spreadsheet.getSheetByName("Sheet1");
+  for(let r=1;r<records.length;r++){
     sheet.appendRow([records[r].OrderId,records[r].Quantity,records[r].Product, records[r].Destination,records[r].CustomerEmail ]);
   }
   
@@ -117,16 +119,18 @@ function saveDataToSheet(records)
  * 4)Builds a string with a range to be cleared
  * 5)Clears content of the sheet within the range
  */     
-function ClearCells() {
+function clearCells(){
   var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   var lastRow = sheet.getLastRow();
   Logger.log("what is inside lastRow "+ lastRow);
   var lastColumn = sheet.getLastColumn();
   Logger.log("What is inside lastColumn "+ lastColumn);
   var rangeForClear = "A2:E" + lastRow;
-  Logger.log("Today is Friday" + rangeForClear);
-  
-  sheet.getRange(rangeForClear).clearContent();
+  //Logger.log("Today is Friday " + rangeForClear);
+  //If statement is checking to prevent clearing of header
+  if(lastRow >= 2){
+    sheet.getRange(rangeForClear).clearContent();   
+  }
 }
 
 /* Remove duplicates rows from spreadsheet
@@ -144,27 +148,37 @@ function NowRemoveDuplicates(){
   let data    = sheet.getDataRange().getValues();
   let newData = [];
   
-  for (let i in data){
-    Logger.log("This is the value for i " + i);
+  
+  for (let i in data)
+  {
+    
+    Logger.log("This is the value for i " + i); 
+    
     let row  = data[i];
     Logger.log("This is the value for row " + row);
-    let duplicate;
+    
+    let duplicate=false;
     Logger.log("This is the value for duplicate " + duplicate);
+    
+    
     for (let j in newData){
-      Logger.log("This the variable for j " + j);  
+      Logger.log("This is the variable for j " + j);  
       Logger.log("Value of row[i] " + row[i]);
-      if(row[0] == newData[j][0] && row[1] == newData[j][1]){
+      
+      if(row[0] == newData[j][0]){
         duplicate = true;
-      }
+        }
+      
     }
+    
     if (!duplicate){
       newData.push(row);
-    
     }
     
   }
   //ClearCells();
-  //sheet.getRange(2,1,newData.length, newData[0].length).setValues(newData);
+  //sheet.getRange(1,1,newData.length, newData[1].length).setValues(newData);
+  
   
 }
 
@@ -175,7 +189,7 @@ function processTransactionEmails()
 {
   let messages = getRelevantMessages();
   let records = parseMessageData(messages);
-  //saveDataToSheet(records);
+  saveDataToSheet(records);
 }
 
 // write multiple rows to the spreadsheet
@@ -199,3 +213,42 @@ function getMultipleRandomRows() {
  console.log(data.length);
  return data;
 }
+/*
+ *1) Gets the active spreadsheet
+ *2) Takes all the data and puts into the variable
+ *3) Assigns and empty array to the variable newData
+ *4) Loops through the data. For each row,
+
+
+*/
+function removeDuplicates() {
+  Logger.log("Test on Friday");
+  let sheet   = SpreadsheetApp.getActiveSheet();
+  let data    = sheet.getDataRange().getValues();
+  Logger.log("What is inside data " + data);
+  Logger.log("How much email is inside data " + data.length);
+  var newData = [];
+  
+  for (let i in data){
+    var row       = data[i];
+    var duplicate = false;
+    for (let j in newData){
+      Logger.log("What is inside row.join "+ row[0]);
+      Logger.log("What is inside newData[j] "+ newData[j][0]);
+       if(row[0] == newData[j][0]){
+         duplicate = true;
+       }
+    }
+    if (!duplicate){
+      //Logger.log(sheet);
+      newData.push(row);
+      Logger.log(" What is inside newData " + newData)
+    }
+  }
+  //Logger.log(sheet);
+  sheet.clearContents();
+  sheet.getRange(1,1, newData.length, newData[0].length).setValues(newData);
+  
+}
+
+
