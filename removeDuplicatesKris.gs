@@ -1,4 +1,5 @@
-function removeDuplicates() {
+function removeDuplicatesKris() {
+  Logger.log(" Code two on a friday ");
   var sheet   = SpreadsheetApp.getActiveSheet();
   var data    = sheet.getDataRange().getValues();
   var newData = [];
