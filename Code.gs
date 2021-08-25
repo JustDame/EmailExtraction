@@ -66,8 +66,6 @@ function getParsedDataDisplay()
   saveDataToSheet(templ.records);
   removeDuplicates();
   
-  //NowRemoveDuplicates();
-  //templ.records();
   return templ.evaluate();
 }
 
@@ -118,106 +116,24 @@ function clearCells(){
   }
 }
 
-/* Remove duplicates rows from spreadsheet
- * 1)Gets the active sheet and places it into a variable
- * 2)Gets all data from all the rows 
- * 3)Creates an empty array
- * 4)Looping through the rows 
- * 5)For each row: Adds to new array if it is not already there.
- * 6)Clears everything from A2:E to the last row.
- * 7)Puts new data without duplicates starting at A2.
-*/ 
-
-function NowRemoveDuplicates(){
-  let sheet   = SpreadsheetApp.getActiveSheet();
-  let data    = sheet.getDataRange().getValues();
-  let newData = [];
-  
-  for (let i in data)
-  {
-    
-    let row  = data[i];
-    let duplicate=false;
-    
-    for (let j in newData){
-      
-      if(row[0] == newData[j][0]){
-        duplicate = true;
-      }
-      
-    }
-    
-    if (!duplicate){
-      newData.push(row);
-    }
-    
-  }
-  //ClearCells();
-  //sheet.getRange(1,1,newData.length, newData[1].length).setValues(newData);
-}
-
-// Processes the emails and looks for transactions
-function processTransactionEmails()
-{
-  let messages = getRelevantMessages();
-  let records = parseMessageData(messages);
-  saveDataToSheet(records);
-}
-
-// write multiple rows to the spreadsheet
-function writeMultipleRows() {
- let data = getOrdersData();
- let lastRow = SpreadsheetApp.getActiveSheet().getLastRow();
- SpreadsheetApp.getActiveSheet().getRange(lastRow + 1,1,data.length, data[0].length).setValues(data);
-}
-
-// if random rows are needed
-function getMultipleRandomRows() {
- let OrderId = 1800;
- let Quantity = 70;
- let Product = "Aspirin";
- let Destination = "67 New York Ave";
-
- var data = [];
- for(var i =0; i < 1000; i++) {
-   data.push([rec.OrderId, rec.Quantity, Product, Destination]);
- }
- console.log(data.length);
- return data;
-}
-/*
- *1) Gets the active spreadsheet
- *2) Takes all the data and puts into the variable
- *3) Assigns and empty array to the variable newData
- *4) Loops through the data. For each row,
-
-
-*/
 function removeDuplicates() {
-  Logger.log("Test on Friday");
   let sheet   = SpreadsheetApp.getActiveSheet();
   let data    = sheet.getDataRange().getValues();
-  Logger.log("What is inside data " + data);
-  Logger.log("How much email is inside data " + data.length);
   var newData = [];
   
   for (let i in data){
     var row       = data[i];
     var duplicate = false;
     for (let j in newData){
-      Logger.log("What is inside row.join "+ row[0]);
-      Logger.log("What is inside newData[j] "+ newData[j][0]);
-       if(row[0] == newData[j][0]){
+      if(row[0] == newData[j][0]){
          duplicate = true;
-       }
+      }
     }
     if (!duplicate){
-      //Logger.log(sheet);
       newData.push(row);
-      Logger.log(" What is inside newData " + newData)
     }
   }
-  //Logger.log(sheet);
+  
   sheet.clearContents();
   sheet.getRange(1,1, newData.length, newData[0].length).setValues(newData);
   
