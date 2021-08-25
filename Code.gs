@@ -1,7 +1,7 @@
 // To get messages from emails
 function getRelevantMessages()
 {
-  var threads = GmailApp.search("subject: Nophin",0,1000);
+  var threads = GmailApp.search("subject: Nophin",0,500);
   var messages=[];
   threads.forEach(function(thread)
                   { 
@@ -24,27 +24,19 @@ function parseMessageData(messages)
   for(var m=0;m<messages.length;m++)
   {
     var subject = messages[m].getSubject();
-    Logger.log("This is the subject " + subject);
     var text = messages[m].getPlainBody();
     var messageId = messages[m].getThread().getId();
     var fromAddress =  messages[m].getFrom();
-    Logger.log("To get the email address  "+ fromAddress);
-    Logger.log("Get message ID "+ messageId)
     var myQuantity = text.match(/Quantity:[(0-9)]+/g);
     var myProduct = text.match(/Product:[A-z0-9 ]+/g);
     var myDestination = text.match(/Destination:[A-z0-9 ]+/g);
     
-    Logger.log("Info from emails " + myQuantity +" "+ myProduct +" "+ myDestination);
-  
-
     if(!myQuantity ||!myProduct || !myDestination)
     {
-      console.log("no matches") 
       //No matches; couldn't parse continue with the next message
       continue;
     }
-    
-    
+        
     for(let i=0;i<myQuantity.length;i++){
       console.log("Checking for Quantity " + myQuantity.length) 
       let rec = {}    
@@ -57,9 +49,6 @@ function parseMessageData(messages)
       records.push(rec);
     }
   }
-  
-  Logger.log("How many records found "+ records.length);
-  Logger.log(records);
   return records;
 
 }
@@ -105,7 +94,7 @@ function saveDataToSheet(records)
   
   let spreadsheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   let sheet = spreadsheet.getSheetByName("Sheet1");
-  for(let r=1;r<records.length;r++){
+  for(let r=0;r<records.length;r++){
     sheet.appendRow([records[r].OrderId,records[r].Quantity,records[r].Product, records[r].Destination,records[r].CustomerEmail ]);
   }
   
@@ -121,11 +110,8 @@ function saveDataToSheet(records)
 function clearCells(){
   var sheet = SpreadsheetApp.openByUrl('https://docs.google.com/spreadsheets/d/1WG-gZMZuRni403_fskzHYnqW8qm0AxqeUwfnRyOw3Cc/edit#gid=0');
   var lastRow = sheet.getLastRow();
-  Logger.log("what is inside lastRow "+ lastRow);
   var lastColumn = sheet.getLastColumn();
-  Logger.log("What is inside lastColumn "+ lastColumn);
   var rangeForClear = "A2:E" + lastRow;
-  //Logger.log("Today is Friday " + rangeForClear);
   //If statement is checking to prevent clearing of header
   if(lastRow >= 2){
     sheet.getRange(rangeForClear).clearContent();   
@@ -147,26 +133,17 @@ function NowRemoveDuplicates(){
   let data    = sheet.getDataRange().getValues();
   let newData = [];
   
-  
   for (let i in data)
   {
     
-    Logger.log("This is the value for i " + i); 
-    
     let row  = data[i];
-    Logger.log("This is the value for row " + row);
-    
     let duplicate=false;
-    Logger.log("This is the value for duplicate " + duplicate);
-    
     
     for (let j in newData){
-      Logger.log("This is the variable for j " + j);  
-      Logger.log("Value of row[i] " + row[i]);
       
       if(row[0] == newData[j][0]){
         duplicate = true;
-        }
+      }
       
     }
     
@@ -177,11 +154,7 @@ function NowRemoveDuplicates(){
   }
   //ClearCells();
   //sheet.getRange(1,1,newData.length, newData[1].length).setValues(newData);
-  
-  
 }
-
-  
 
 // Processes the emails and looks for transactions
 function processTransactionEmails()
